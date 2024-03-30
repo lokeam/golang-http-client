@@ -28,6 +28,24 @@ func main() {
 	getUrls()
 }
 
+type User struct {
+	FirstName string
+	LastName string
+}
+
+func createUser(user User) {
+	response, err := githubHttpClient.Post("https://api.github.com", nil, user)
+
+	if (err != nil) {
+		panic(err)
+	}
+
+	fmt.Println(response.StatusCode)
+
+	bytes, _ := io.ReadAll(response.Body)
+	fmt.Println(string(bytes))
+}
+
 func getUrls() {
 	headers := make(http.Header)
 
