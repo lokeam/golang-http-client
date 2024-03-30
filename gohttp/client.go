@@ -1,5 +1,7 @@
 package gohttp
 
+import "net/http"
+
 type httpClient struct {}
 
 func New() HttpClient {
@@ -15,7 +17,9 @@ type HttpClient interface {
 	Delete()
 }
 
-func(c *httpClient) Get() {}
+func(c *httpClient) Get(url string, headers http.Header) (*http.Response, error) {
+	return c.do(http.MethodGet, url, headers, nil)
+}
 
 func(c *httpClient) Post() {}
 
