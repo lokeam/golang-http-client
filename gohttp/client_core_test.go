@@ -1,8 +1,10 @@
 package gohttp
 
 import (
+	"encoding/xml"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -69,13 +71,58 @@ func TestGetRequestBody(t* testing.T) {
 		}
 	})
 
-	t.Run("WithBodyWithXml", func(t* testing.T) {
+	t.Run("WithBodyWithXML", func(t *testing.T) {
+    // Define a struct with exported fields and a root element for XML marshaling.
+    requestBody := struct {
+        XMLName xml.Name `xml:"Root"`
+        Item1   string   `xml:"Item1"`
+        Item2   string   `xml:"Item2"`
+    }{
+        Item1: "one",
+        Item2: "two",
+    }
 
-	})
-	t.Run("WithBodyWithJsonAsDefault", func(t* testing.T) {
+    body, err := client.getRequestBody("application/xml", requestBody)
 
-	})
+    if err != nil {
+        t.Errorf("no error expected when marshaling struct as xml, got %v", err)
+    }
 
+    // Note: The expected XML string must include the root element and possibly XML declaration.
+    // The actual output might include the XML declaration and spaces. Adjust accordingly.
+    expectedBody := `<Root><Item1>one</Item1><Item2>two</Item2></Root>`
+    // Using strings.Contains to allow flexibility in how the XML is formatted and encoded.
+    if !strings.Contains(string(body), expectedBody) {
+        t.Errorf("invalid xml body obtained, expected %s, got %s", expectedBody, string(body))
+    }
+})
 
+	t.Run("WithBodyWithJsonAsDefault", func(t *testing.T) {
+    // Testing with no contentType
+    requestBody := map[string]string{"key": "value"}
+
+    body, err := client.getRequestBody("", requestBody)
+
+    if err != nil {
+        t.Errorf("no error expected when defaulting to JSON marshaling, got %v", err)
+    }
+
+    expectedBody := `{"key":"value"}`
+    if string(body) != expectedBody {
+        t.Errorf("invalid json body obtained, expected %s, got %s", expectedBody, string(body))
+    }
+
+    // Testing with unsupported contentType
+    body, err = client.getRequestBody("application/unsupported", requestBody)
+
+    if err != nil {
+        t.Errorf("no error expected when defaulting to JSON marshaling with unsupported contentType, got %v", err)
+    }
+
+    // The expectedBody remains the same as JSON is the default
+    if string(body) != expectedBody {
+        t.Errorf("invalid json body obtained with unsupported contentType, expected %s, got %s", expectedBody, string(body))
+    }
+})
 
 }
