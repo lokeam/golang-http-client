@@ -1,44 +1,47 @@
 package gohttp
 
 import (
-	"net"
 	"net/http"
 	"time"
 )
 
 type httpClient struct {
-	client *http.Client
-	Headers http.Header
+	client 							*http.Client
+	maxIdleConnections 	int
+	connectionTimeout 	time.Duration
+	responseTimeout 		time.Duration
+	Headers 						http.Header
 }
 
 func New() HttpClient {
-	client := http.Client{
-		Transport: &http.Transport{
-			// Value should be configured based on estimated pattern of requests/min
-			MaxIdleConnsPerHost: 		5,
-			// Max amount of time to wait for a response after sending request
-			ResponseHeaderTimeout: 	5 * time.Second,
-			DialContext: 						(&net.Dialer{
-				// Max amount of time to wait for any given connection
-				Timeout: 1 * time.Second,
-			}).DialContext,
-		},
-	}
-
-	httpClient := &httpClient{
-		client: &client,
-	}
-
+	httpClient := &httpClient{}
 	return httpClient
 }
 
 type HttpClient interface {
+	SetConnectionTimeout(timeout time.Duration)
+	SetResponseTimeout(timeout time.Duration)
+	SetMaxIdleConnectins(connections int)
+
 	SetHeaders(headers http.Header)
+
 	Get(url string, headers http.Header) (*http.Response, error)
 	Post(url string, headers http.Header, body interface{}) (*http.Response, error)
 	Put(url string, headers http.Header, body interface{}) (*http.Response, error)
 	Patch(url string, headers http.Header, body interface{}) (*http.Response, error)
 	Delete(url string, headers http.Header) (*http.Response, error)
+}
+
+func(c *httpClient) SetConnectionTimeout(timeout time.Duration) {
+	c.connectionTimeout = timeout
+}
+
+func(c *httpClient) SetResponseTimeout(timeout time.Duration) {
+	c.responseTimeout = timeout
+}
+
+func(c *httpClient) SetMaxIdleConnectins(connections int) {
+	c.maxIdleConnections = connections
 }
 
 func(c *httpClient) SetHeaders(headers http.Header) {
