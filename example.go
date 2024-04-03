@@ -12,21 +12,16 @@ var (
 	githubHttpClient = getGithubClient()
 )
 
-func getGithubClient() gohttp.HttpClient {
-	client := gohttp.New()
+func getGithubClient() gohttp.Client {
+	client := gohttp.NewBuilder().
+		DisableTimeouts(true).
+		SetMaxIdleConnections(6).
+		Build()
 
-	client.DisableTimeouts(true)
-
-	commonHeaders := make(http.Header)
-	commonHeaders.Set("Authorization", "Some-auth-value-987")
-
-	client.SetHeaders(commonHeaders)
 	return client
 }
 
 func main() {
-	getUrls()
-	getUrls()
 	getUrls()
 }
 
