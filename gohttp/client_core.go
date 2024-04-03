@@ -62,6 +62,7 @@ func(c *httpClient) getHttpClient() *http.Client {
 	}
 
 	c.client = &http.Client{
+		Timeout: c.getConnectionTimeout() + c.getResponseTimeout(),
 		Transport: &http.Transport{
 			// Value should be configured based on estimated pattern of requests/min
 			MaxIdleConnsPerHost: 		c.getMaxIdleConnections(),
@@ -89,12 +90,20 @@ func(c *httpClient) getResponseTimeout() time.Duration {
 		return c.responseTimeout
 	}
 
+	if c.disableTimeouts  {
+		return 0
+	}
+
 	return defaultResponseTimeout
 }
 
 func(c *httpClient) getConnectionTimeout() time.Duration {
 	if c.connectionTimeout > 0 {
 		return c.connectionTimeout
+	}
+
+	if c.disableTimeouts  {
+		return 0
 	}
 
 	return defaultConnectionTimeout
