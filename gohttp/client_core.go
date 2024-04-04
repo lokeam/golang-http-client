@@ -57,23 +57,22 @@ func (c * httpClient) do(method string, url string, headers http.Header, body in
 }
 
 func(c *httpClient) getHttpClient() *http.Client {
-	if c.client != nil {
-		return c.client
-	}
+	c.clientOnce.Do(func ()  {
+		c.client = &http.Client{
+			Timeout: c.getConnectionTimeout() + c.getResponseTimeout(),
+			Transport: &http.Transport{
+				// Value should be configured based on estimated pattern of requests/min
+				MaxIdleConnsPerHost: 		c.getMaxIdleConnections(),
+				// Max amount of time to wait for a response after sending request
+				ResponseHeaderTimeout: 	c.getResponseTimeout(),
+				DialContext: 						(&net.Dialer{
+					// Max amount of time to wait for any given connection
+					Timeout: c.getConnectionTimeout(),
+				}).DialContext,
+			},
+		}
+	})
 
-	c.client = &http.Client{
-		Timeout: c.getConnectionTimeout() + c.getResponseTimeout(),
-		Transport: &http.Transport{
-			// Value should be configured based on estimated pattern of requests/min
-			MaxIdleConnsPerHost: 		c.getMaxIdleConnections(),
-			// Max amount of time to wait for a response after sending request
-			ResponseHeaderTimeout: 	c.getResponseTimeout(),
-			DialContext: 						(&net.Dialer{
-				// Max amount of time to wait for any given connection
-				Timeout: c.getConnectionTimeout(),
-			}).DialContext,
-		},
-	}
 	return c.client
 }
 
