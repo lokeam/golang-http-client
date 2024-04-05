@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/lokeam/golang-http-client/gohttp"
 )
@@ -30,30 +28,13 @@ type User struct {
 	LastName string
 }
 
-func createUser(user User) {
-	response, err := githubHttpClient.Post("https://api.github.com", nil, user)
-
-	if (err != nil) {
-		panic(err)
-	}
-
-	fmt.Println(response.StatusCode)
-
-	bytes, _ := io.ReadAll(response.Body)
-	fmt.Println(string(bytes))
-}
-
 func getUrls() {
-	headers := make(http.Header)
-
-	response, err := githubHttpClient.Get("https://api.github.com", headers)
-
+	response, err := githubHttpClient.Get("https://api.github.com", nil)
 	if (err != nil) {
 		panic(err)
 	}
 
-	fmt.Println(response.StatusCode)
-
-	bytes, _ := io.ReadAll(response.Body)
-	fmt.Println(string(bytes))
+	fmt.Println(response.Status())
+	fmt.Println(response.StatusCode())
+	fmt.Println(response.String())
 }
