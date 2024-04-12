@@ -44,6 +44,10 @@ func (c * httpClient) do(method string, url string, headers http.Header, body in
 		return nil, err
 	}
 
+	if mock := mockupServer.getMock(method, url, string(requestBody)); mock != nil {
+		return mock.GetResponse()
+	}
+
 	request, err := http.NewRequest(method, url, bytes.NewBuffer(requestBody))
 
 	if err != nil {

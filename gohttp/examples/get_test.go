@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/lokeam/golang-http-client/gohttp"
@@ -52,7 +53,7 @@ func TestGetEndpoints(t *testing.T) {
 			t.Error("error expected")
 		}
 
-		if err.Error() != "json unmarshal error" {
+		if !strings.Contains(err.Error(), "json unmarshal error") {
 			t.Error("invalid error message received")
 		}
 	})
